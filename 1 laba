@@ -1,0 +1,41 @@
+print("Hello, World!")
+
+age = 17
+name = "Nikita"
+numbers = {1, 2, 3, 3}
+
+print(age)
+print(type(age))
+
+print(name)
+print(type(name))
+
+print(numbers)
+print(type(numbers))
+
+a = 7
+b = 1
+
+print("Початкові числа: a =", a, ", b =", b)
+print("-" * 30)
+
+sum_result = a + b
+print("Додавання (a + b):", sum_result)
+
+sub_result = a - b
+print("Віднімання (a - b):", sub_result)
+
+mult_result = a * b
+print("Множення (a * b):", mult_result)
+
+div_result = a / b
+print("Звичайне ділення (a / b):", div_result)
+
+int_div_result = a // b
+print("Цілочисельне ділення (a // b):", int_div_result)
+
+mod_result = a % b
+print("Залишок від ділення (a % b):", mod_result)
+
+pow_result = a ** b
+print("Піднесення до степеня (a ** b):", pow_result)
