@@ -74,4 +74,4 @@ current_user = find_user(login, password)
 if current_user is not None:
     show_grades(current_user)
 else:
-    print("\nПомилка: неправильний логін або пароль.")
+    print("\nПомилка: неправильний логін або пароль.") 
