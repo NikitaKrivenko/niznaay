@@ -58,20 +58,3 @@ print(x >= y)  # більше або дорівнює
 print(x <= y)  # менше або дорівнює
 
 
-# Логічні оператори
-a1 = True
-b1 = False
-
-print(a1 and b1)  # І
-print(a1 or b1)   # АБО
-print(not a1)     # НЕ
-
-# Виведення типів
-print(type(age))
-print(type(a))
-print(type(name))
-print(type(n))
-print(type(list1))
-print(type(tpl))
-print(type(dct))
-print(type(st))
