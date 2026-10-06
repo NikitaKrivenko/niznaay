@@ -1,208 +1,50 @@
-from dataclasses import dataclass
-
-
-@dataclass
-class Product:
-    id: int
-    name: str
-    price: int  # ціна в копійках
-    stock: int
-
-
-@dataclass
-class CartLine:
-    product: Product
-    quantity: int
-
-
-def format_price(kopecks: int) -> str:
-    return f"{kopecks // 100:03d}.{kopecks % 100:02d}грн"
-
-
 class Store:
-    def __init__(self) -> None:
-        self.products = [
-            Product(1, "Хліб", 3290, 12),
-            Product(2, "Молоко", 4590, 8),
-            Product(3, "Кава", 18990, 6),
-            Product(4, "Шоколад", 6990, 10),
-            Product(5, "Чай", 12450, 5),
-        ]
-        self.cart: dict[int, CartLine] = {}
+    def __init__(self):
+        self.products = {
+            1: ["Хліб", 3290, 12], 2: ["Молоко", 4590, 8],
+            3: ["Кава", 18990, 6], 4: ["Шоколад", 6990, 10],
+            5: ["Чай", 12450, 5]}
+        self.cart = {}
 
-    def find_product(self, product_id: int) -> Product | None:
-        return next((p for p in self.products if p.id == product_id), None)
+    def price(self, c): return f"{c // 100:03d}.{c % 100:02d}грн"
+    def total(self): return sum(map(lambda x: self.products[x[0]][1] * x[1], self.cart.items()))
 
-    def add_to_cart(self, product_id: int, quantity: int) -> None:
-        product = self.find_product(product_id)
-        if product is None:
-            raise ValueError("Товар не знайдено.")
-        if quantity < 1:
-            raise ValueError("Кількість має бути більшою за нуль.")
-
-        line = self.cart.get(product_id)
-        in_cart = line.quantity if line else 0
-        if in_cart + quantity > product.stock:
-            raise ValueError(f"Недостатньо товару «{product.name}» на складі.")
-
-        if line:
-            line.quantity += quantity
-        else:
-            self.cart[product_id] = CartLine(product, quantity)
-
-    def remove_from_cart(self, product_id: int) -> bool:
-        return self.cart.pop(product_id, None) is not None
-
-    def cart_total(self) -> int:
-        return sum(
-            map(lambda line: line.product.price * line.quantity, self.cart.values())
-        )
-
-    def buy(self) -> list[CartLine]:
-        items = list(self.cart.values())
-        if not items:
-            raise ValueError("Кошик порожній.")
-
-        shortage = next(
-            (line for line in items if line.quantity > line.product.stock), None
-        )
-        if shortage:
-            raise ValueError(f"Недостатньо товару «{shortage.product.name}».")
-
-        for line in items:
-            line.product.stock -= line.quantity
-
-        self.cart.clear()
-        return items
-
-
-class AdminAuth:
-    def login(self, username: str, password: str) -> bool:
-        return username == "admin" and password == "admin123"
-
-
-def read_number(prompt: str) -> int:
-    while True:
-        try:
-            number = int(input(prompt))
-            if number > 0:
-                return number
-        except ValueError:
-            pass
-
-        print("Введіть ціле число, більше за нуль.")
-
-
-def show_catalog(store: Store) -> None:
-    print("\n=== КАТАЛОГ ===")
-    for product in store.products:
-        availability = "в наявності" if product.stock else "немає"
-        print(
-            f"{product.id}. {product.name} — "
-            f"{format_price(product.price)} ({availability})"
-        )
-
-
-def show_cart(store: Store) -> None:
-    print("\n=== КОШИК ===")
-    if not store.cart:
-        print("Кошик порожній.")
-        return
-
-    for line in store.cart.values():
-        total = line.product.price * line.quantity
-        print(
-            f"{line.product.id}. {line.product.name} × {line.quantity} — "
-            f"{format_price(total)}"
-        )
-
-    print(f"Разом: {format_price(store.cart_total())}")
-
-
-def admin_menu(store: Store, auth: AdminAuth) -> None:
-    username = input("Логін: ").strip()
-    password = input("Пароль: ")
-
-    if not auth.login(username, password):
-        print("Неправильний логін або пароль.")
-        return
-
-    print("\n=== ЗАЛИШКИ ===")
-    for product in store.products:
-        print(
-            f"{product.name}: {product.stock} шт. — "
-            f"{format_price(product.price)}"
-        )
-
-
-def main() -> None:
-    store = Store()
-    auth = AdminAuth()
-    print("Вітаємо в міні-магазині!")
-
-    while True:
-        print(
-            "\n1. Каталог\n2. Додати в кошик\n3. Видалити з кошика"
-            "\n4. Переглянути кошик\n5. Купити"
-            "\n6. Вхід адміністратора\n0. Вихід"
-        )
-        choice = input("Ваш вибір: ").strip()
-
-        try:
-            if choice == "1":
-                show_catalog(store)
-
-            elif choice == "2":
-                show_catalog(store)
-                product_id = read_number("Номер товару: ")
-                quantity = read_number("Кількість: ")
-                store.add_to_cart(product_id, quantity)
-                print("Товар додано в кошик.")
-
-            elif choice == "3":
-                show_cart(store)
-                if store.cart:
-                    product_id = read_number("Номер товару для видалення: ")
-                    if store.remove_from_cart(product_id):
-                        print("Товар видалено.")
+    def run(self):
+        while True:
+            print("\n1 Каталог  2 Додати  3 Видалити  4 Кошик\n5 Купити  6 Адмін  0 Вихід")
+            choice = input("Ваш вибір: ").strip()
+            try:
+                if choice == "1":
+                    for i, p in self.products.items(): print(f"{i}. {p[0]} — {self.price(p[1])}")
+                elif choice == "2":
+                    i, q = int(input("Номер: ")), int(input("Кількість: "))
+                    if i not in self.products or q < 1 or self.cart.get(i, 0) + q > self.products[i][2]:
+                        print("Немає товару або недостатньо залишку.")
                     else:
-                        print("Товару немає в кошику.")
-
-            elif choice == "4":
-                show_cart(store)
-
-            elif choice == "5":
-                receipt = store.buy()
-                total = sum(
-                    map(
-                        lambda line: line.product.price * line.quantity,
-                        receipt,
-                    )
-                )
-
-                print("\n=== ПОКУПКУ ОФОРМЛЕНО ===")
-                for line in receipt:
-                    print(
-                        f"{line.product.name} × {line.quantity} — "
-                        f"{format_price(line.product.price * line.quantity)}"
-                    )
-
-                print(f"До сплати: {format_price(total)}")
-                print("Дякуємо за покупку!")
-
-            elif choice == "6":
-                admin_menu(store, auth)
-
-            elif choice == "0":
-                print("До побачення!")
-                break
-
-            else:
-                print("Невідома команда.")
-
-        except ValueError as error:
-            print(error)
+                        self.cart[i] = self.cart.get(i, 0) + q
+                        print("Додано.")
+                elif choice == "3":
+                    print("Видалено." if self.cart.pop(int(input("Номер: ")), None) else "Немає в кошику.")
+                elif choice == "4":
+                    if not self.cart: print("Кошик порожній.")
+                    for i, q in self.cart.items(): print(f"{self.products[i][0]} × {q} — {self.price(self.products[i][1] * q)}")
+                    if self.cart: print("Разом:", self.price(self.total()))
+                elif choice == "5":
+                    if not self.cart: print("Кошик порожній.")
+                    elif any(q > self.products[i][2] for i, q in self.cart.items()): print("Недостатньо товару.")
+                    else:
+                        amount = self.total()
+                        for i, q in self.cart.items(): self.products[i][2] -= q
+                        self.cart.clear()
+                        print("Покупку оформлено:", self.price(amount))
+                elif choice == "6":
+                    if input("Логін: ") == "admin" and input("Пароль: ") == "admin123":
+                        for p in self.products.values(): print(f"{p[0]}: {p[2]} шт.")
+                    else: print("Неправильний логін або пароль.")
+                elif choice == "0": break
+                else: print("Невідома команда.")
+            except ValueError:
+                print("Введіть коректне число.")
 
 
-if __name__ == "__main__":
-    main()
+Store().run()
